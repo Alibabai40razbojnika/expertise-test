@@ -1,0 +1,130 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head> 
+        <title th:text="${tractor.data.serialNumber + '-' + tractor.data.date}"></title> 
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+        <link rel="stylesheet" type="text/css" href="./main.css" />
+    </head>
+    <body>
+        <div th:switch="${tractor.status}">
+            <div th:case="400"><p th:text="${tractor.message}"/></div>
+            <div th:case="404"><p th:text="${tractor.message}"/></div>
+            <div th:case="200">
+                <table>
+                    <tr>
+                        <th>key</th>
+                        <th>value</th>
+                    </tr>
+                    <tr>
+                        <td>serialNumber</td>
+                        <td th:text="${tractor.data.serialNumber}"></td>
+                    </tr>
+                    <tr>
+                        <td>date</td>
+                        <td th:text="${tractor.data.date}"></td>
+                    </tr>
+                    <tr>
+                        <td>totalWorkingHours</td>
+                        <td th:text="${tractor.data.totalWorkingHours}"></td>
+                    </tr>
+                    <tr>
+                        <td>workingHours</td>
+                        <td th:text="${tractor.data.workingHours}"></td>
+                    </tr>
+                    <tr>
+                        <td>minRevolutions</td>
+                        <td th:text="${tractor.data.minRevolutions}"></td>
+                    </tr>
+                    <tr>
+                        <td>avgRevolutions</td>
+                        <td th:text="${tractor.data.avgRevolutions}"></td>
+                    </tr>
+                    <tr>
+                        <td>maxRevolutions</td>
+                        <td th:text="${tractor.data.maxRevolutions}"></td>
+                    </tr>
+
+                    <tr>
+                        <td>minEngineLoad</td>
+                        <td th:text="${tractor.data.minEngineLoad}"></td>
+                    </tr>
+                    <tr>
+                        <td>avgEngineLoad</td>
+                        <td th:text="${tractor.data.avgEngineLoad}"></td>
+                    </tr>
+                    <tr>
+                        <td>maxEngineLoad</td>
+                        <td th:text="${tractor.data.maxEngineLoad}"></td>
+                    </tr>
+                    <tr>
+                        <td>minFuelConsumption</td>
+                        <td th:text="${tractor.data.minFuelConsumption}"></td>
+                    </tr>
+                    <tr>
+                        <td>avgFuelConsumption</td>
+                        <td th:text="${tractor.data.avgFuelConsumption}"></td>
+                    </tr>
+                    <tr>
+                        <td>maxFuelConsumption</td>
+                        <td th:text="${tractor.data.maxFuelConsumption}"></td>
+                    </tr>
+                </table>
+                <p id="coordinates" style="display: none" hidden="true" th:text="${tractor.data.coordinateListJson}"/>
+            </div>
+        </div>
+        <h3>Tractor path</h3>
+        <!--The div element for the map -->
+        <div id="map"></div><div>
+    </body>
+    <script type="text/javascript" th:src="${apiUrl}"></script>
+
+
+    <script>
+        $(document).ready(function () {
+            initMap();
+        });
+
+
+        function initMap() {
+            console.log("runed")
+            var coordinatesJSON = JSON.parse($("#coordinates").text());
+            var coordinatesString;
+
+            var longitudeMin = coordinatesJSON[0].longitude;
+            var longitudeMax = coordinatesJSON[0].longitude;
+            var latitudeMin = coordinatesJSON[0].latitude;
+            var latitudeMax = coordinatesJSON[0].latitude;
+
+            var tractorPathCoordinates = [coordinatesJSON.length];
+
+            tractorPathCoordinates[0] = new google.maps.LatLng(Number(coordinatesJSON[0].latitude), Number(coordinatesJSON[0].longitude));
+            for (var i = 1; i < coordinatesJSON.length; i++) {
+                tractorPathCoordinates[i] = new google.maps.LatLng(Number(coordinatesJSON[i].latitude), Number(coordinatesJSON[i].longitude));
+
+                longitudeMin = longitudeMin > coordinatesJSON[i].longitude ? coordinatesJSON[i].longitude : longitudeMin;
+                longitudeMax = longitudeMax < coordinatesJSON[i].longitude ? coordinatesJSON[i].longitude : longitudeMax;
+                latitudeMin = latitudeMin > coordinatesJSON[i].latitude ? coordinatesJSON[i].latitude : latitudeMin;
+                latitudeMax = latitudeMax < coordinatesJSON[i].latitude ? coordinatesJSON[i].latitude : latitudeMax;
+            }
+
+            const map = new google.maps.Map(document.getElementById("map"), {
+                zoom: 17,
+                center: createCoordinate((latitudeMax + latitudeMin) / 2, (longitudeMax + longitudeMin) / 2),
+                mapTypeId: "terrain"
+            });
+            const tractorPath = new google.maps.Polyline({
+                path: tractorPathCoordinates,
+                geodesic: true,
+                strokeColor: "#FF0000",
+                strokeOpacity: 1.0,
+                strokeWeight: 2
+            });
+            tractorPath.setMap(map);
+        }
+
+        function createCoordinate(latitude, longitude) {
+            return {lat: latitude, lng: longitude};
+        }
+    </script>
+</html>

@@ -1,0 +1,15 @@
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <title>TODO supply a title</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body>
+        <h1>Form</h1>
+        <form th:action="@{/tractor}" th:object="${tractorForm}" method="post">
+            <p>Serial Number: <input type="text" th:field="*{serialNumber}" value="A2302888" /></p>
+            <p>Date: <input type="text" th:field="*{date}" value="25.04.2019" /></p>
+            <p><input type="submit" value="Submit" /> <input type="reset" value="Reset" /></p>
+        </form>
+    </body>
+</html>
