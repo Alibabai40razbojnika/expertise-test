@@ -4,7 +4,6 @@ import com.expertise.filip.wrapper.BigQueryWrapper;
 import com.expertise.filip.wrapper.StorageWrapper;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,15 +24,13 @@ public class SchedulerConfig {
     @Autowired
     private BigQueryWrapper bigQueryWrapper;
 
-//    @Scheduled(fixedRate = 86400000)
-    @Scheduled(fixedRate = 60000)
+    @Scheduled(fixedRateString = "${local.to.storage.scheduler.seconds}000", initialDelayString = "${local.to.storage.scheduler.delay.seconds}000")
     public void localToStorage() {
         storageWrapper.uploadLocalFilesToStorage();
         LOGGER.log(Level.INFO, "Upload from local to storage finished at {0}", dateFormat.format(new Date()));
     }
 
-//    @Scheduled(fixedRate = 3600000)
-    @Scheduled(fixedRate = 60000)
+    @Scheduled(fixedRateString = "${storage.to.bigquery.scheduler.seconds}000", initialDelayString = "${storage.to.bigquery.scheduler.delay.seconds}000")
     public void storageToQuery() {
         for (String storageFileToProces : storageWrapper.listFilesByFileNamePattern()) {
             bigQueryWrapper.runExternalTableMergeQuery(storageFileToProces);
